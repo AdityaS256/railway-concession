@@ -1,113 +1,561 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from "react";
+import supabase from "./lib/supabase";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SuccessPage from "@/components/SuccessPage";
+import Footer from "@/components/Footer";
 
 export default function Home() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    address: "",
+    school: "MPSTME",
+    sapId: "",
+    contact: "",
+    gender: "",
+    dob: "",
+    age: "",
+    course: "",
+    stream: "",
+    year: "",
+    classForPass: "",
+    passPeriod: "",
+    railwayType: "",
+    station: "",
+    collectiondate: "",
+    timeslot: "",
+  });
+
+  const [errors, setErrors] = useState({
+    sapId: "",
+    contact: "",
+    dob: "",
+  });
+
+  const [timeslots, setTimeslots] = useState([
+    {
+      value: "11.00 AM TO 12.00 PM",
+      label: "11.00 AM TO 12.00 PM",
+      disabled: false,
+    },
+    {
+      value: "12.00 PM TO 1.00 PM",
+      label: "12.00 PM TO 1.00 PM",
+      disabled: false,
+    },
+    {
+      value: "2.00 PM TO 3.00 PM",
+      label: "2.00 PM TO 3.00 PM",
+      disabled: false,
+    },
+    {
+      value: "3.00 PM TO 4.00 PM",
+      label: "3.00 PM TO 4.00 PM",
+      disabled: false,
+    },
+  ]);
+
+  const fetchSlotAvailability = async (date) => {
+    const { data: slots, error } = await supabase
+      .from("slots")
+      .select("timeslot, count")
+      .eq("collectiondate", date);
+
+    if (error) {
+      console.error("Error fetching slot availability:", error.message);
+      return [];
+    }
+
+    const updatedSlots = timeslots.map((slot) => {
+      const slotData = slots.find((s) => s.timeslot === slot.value);
+      return {
+        ...slot,
+        disabled: !(slotData === undefined || slotData.count > 60),
+      };
+    });
+
+    setTimeslots(updatedSlots);
+  };
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const years = today.getFullYear() - birthDate.getFullYear();
+    const months = today.getMonth() - birthDate.getMonth();
+    const totalMonths = years * 12 + months;
+
+    const ageYears = Math.floor(totalMonths / 12);
+    const ageMonths = totalMonths % 12;
+
+    return { ageYears, ageMonths };
+  };
+  const isWeekend = (date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    if (name === "sapId") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        sapId: value.length !== 11 ? "SAP ID should be 11 digits" : "",
+      }));
+    }
+
+    if (name === "contact") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        contact: value.length !== 10 ? "Mobile number should be 10 digits" : "",
+      }));
+    }
+
+    if (name === "dob") {
+      const { ageYears, ageMonths } = calculateAge(value);
+      if (ageYears < 14 || ageYears > 25) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          dob: "Age should be between 14 and 25 years",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          dob: "",
+        }));
+        setFormData({
+          ...formData,
+          dob: value,
+          age: `${ageYears} years ${ageMonths} months`,
+        });
+      }
+    }
+
+    if (name === "collectiondate") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      const twoDaysLater = new Date(today);
+      twoDaysLater.setDate(today.getDate() + 2);
+
+      if (selectedDate < twoDaysLater) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          collectiondate:
+            "Collection date must be at least two days from today",
+        }));
+      } else if (isWeekend(selectedDate)) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          collectiondate: "Collection date cannot be on a Saturday or Sunday",
+        }));
+      } else {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          collectiondate: "",
+        }));
+        fetchSlotAvailability(value);
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    await fetchSlotAvailability(formData.collectiondate);
+
+    const dataToInsert = {
+      firstname: formData.firstName,
+      lastname: formData.lastName,
+      address: formData.address,
+      school: formData.school,
+      sapid: formData.sapId,
+      contact: formData.contact,
+      gender: formData.gender,
+      dob: formData.dob,
+      age: formData.age,
+      course: formData.course,
+      stream: formData.stream,
+      year: formData.year,
+      classforpass: formData.classForPass,
+      passperiod: formData.passPeriod,
+      railwaytype: formData.railwayType,
+      station: formData.station,
+      collectiondate: formData.collectiondate,
+      timeslot: formData.timeslot,
+    };
+
+    const { data, error } = await supabase
+      .from("form_submissions")
+      .insert([dataToInsert]);
+
+    if (error) {
+      alert("An error occured: ", error.message);
+      console.error("Error inserting data:", error.message);
+    } else {
+      alert("Form submitted sucessfully");
+      setIsSubmitted(true);
+      console.log("Data inserted successfully:", data);
+    }
+  };
+
+  const handleSelectChange = (name, value) => {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  if (isSubmitted) {
+    return <SuccessPage formData={formData} />;
+  }
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="flex min-h-screen flex-col items-center bg-zinc-950 justify-between p-6">
+      <h1 className=" text-4xl font-black my-4 text-transparent bg-clip-text bg-gradient-to-tr from-blue-500 to-green-500">Railway Concession </h1>
+      <form onSubmit={handleSubmit} className="space-y-4 w-full p-6 max-w-lg">
+        <div>
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            placeholder="First Name"
+            className="border p-2 w-full"
+            required
+          />
         </div>
-      </div>
+        <div>
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            placeholder="Last Name"
+            className="border p-2 w-full"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="address">Address</Label>
+          <Textarea
+            id="address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            placeholder="Address"
+            className="border p-2 w-full"
+            rows="3"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="school">School</Label>
+          <Input
+            id="school"
+            name="school"
+            value={formData.school}
+            onChange={handleChange}
+            placeholder="School"
+            className="border p-2 w-full"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="sapId">SAP ID</Label>
+          <Input
+            id="sapId"
+            name="sapId"
+            value={formData.sapId}
+            onChange={handleChange}
+            placeholder="SAP ID"
+            className={`border p-2 w-full ${errors.sapId && "border-red-500"}`}
+            type="number"
+            required
+          />
+          {errors.sapId && (
+            <p className="text-red-500 text-sm my-3">{errors.sapId}</p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="contact">Mobile Number</Label>
+          <Input
+            id="contact"
+            name="contact"
+            value={formData.contact}
+            onChange={handleChange}
+            placeholder="Mobile Number"
+            className={`border p-2 w-full ${
+              errors.contact ? "border-red-500" : ""
+            }`}
+            type="number"
+            required
+          />
+          {errors.contact && (
+            <p className="text-red-500 text-sm my-3">{errors.contact}</p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="gender">Gender</Label>
+          <Select
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onValueChange={(value) => handleSelectChange("gender", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="male">Male</SelectItem>
+              <SelectItem value="female">Female</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="dob">Date of Birth</Label>
+          <Input
+            id="dob"
+            name="dob"
+            value={formData.dob}
+            onChange={handleChange}
+            placeholder="Date of Birth"
+            className="border p-2 w-full"
+            type="date"
+            required
+          />
+          {errors.dob && <p className="text-red-400 my-3">{errors.dob}</p>}
+        </div>
+        <div>
+          <Label htmlFor="age">Age</Label>
+          <Input
+            id="age"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+            placeholder="Age"
+            className="border p-2 w-full"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="course">Course</Label>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+          <Select
+            id="course"
+            name="course"
+            value={formData.course}
+            onValueChange={(value) => handleSelectChange("course", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Course" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="B TECH">B TECH</SelectItem>
+              <SelectItem value="B TECH (INTEGRATED)">
+                B TECH (INTEGRATED)
+              </SelectItem>
+              <SelectItem value="MBA TECH">MBA TECH</SelectItem>
+              <SelectItem value="MCA">MCA</SelectItem>
+              <SelectItem value="M TECH">M TECH</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="stream">Stream</Label>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+          <Select
+            id="stream"
+            name="stream"
+            value={formData.stream}
+            onValueChange={(value) => handleSelectChange("stream", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Stream" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ARTIFICIAL INTELLIGENCE">
+                ARTIFICIAL INTELLIGENCE
+              </SelectItem>
+              <SelectItem value="CIVIL">CIVIL</SelectItem>
+              <SelectItem value="COMPUTER">COMPUTER</SelectItem>
+              <SelectItem value="COMPUTER SCIENCE & BUSINESS SYSTEMS">
+                COMPUTER SCIENCE & BUSINESS SYSTEMS
+              </SelectItem>
+              <SelectItem value="COMPUTER SCIENCE & ENGINEERING DATA SCIENCE (311)">
+                COMPUTER SCIENCE & ENGINEERING DATA SCIENCE (311)
+              </SelectItem>
+              <SelectItem value="CYBER SECURITY">CYBER SECURITY</SelectItem>
+              <SelectItem value="DATA SCIENCE">DATA SCIENCE</SelectItem>
+              <SelectItem value="ELECTRONICS & TELECOMMUNICATION">
+                ELECTRONICS & TELECOMMUNICATION
+              </SelectItem>
+              <SelectItem value="INFORMATION TECHNOLOGY">
+                INFORMATION TECHNOLOGY
+              </SelectItem>
+              <SelectItem value="MECHANICAL">MECHANICAL</SelectItem>
+              <SelectItem value="MECHATRONICS">MECHATRONICS</SelectItem>
+              <SelectItem value="MCA">MCA</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="year">Year</Label>
+          <Select
+            id="year"
+            name="year"
+            value={formData.year}
+            onValueChange={(value) => handleSelectChange("year", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1</SelectItem>
+              <SelectItem value="2">2</SelectItem>
+              <SelectItem value="3">3</SelectItem>
+              <SelectItem value="4">4</SelectItem>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="classForPass">Class for Pass</Label>
+          <Select
+            id="classForPass"
+            name="classForPass"
+            value={formData.classForPass}
+            onValueChange={(value) => handleSelectChange("classForPass", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Class for Pass" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="first">First</SelectItem>
+              <SelectItem value="second">Second</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="passPeriod">Pass Period</Label>
+          <Select
+            id="passPeriod"
+            name="passPeriod"
+            value={formData.passPeriod}
+            onValueChange={(value) => handleSelectChange("passPeriod", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pass Period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="quarterly">Quarterly</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="railwayType">Railway Type</Label>
+          <Select
+            id="railwayType"
+            name="railwayType"
+            value={formData.railwayType}
+            onValueChange={(value) => handleSelectChange("railwayType", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Railway Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="central">Central</SelectItem>
+              <SelectItem value="western">Western</SelectItem>
+              <SelectItem value="harbor">Harbor</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="station">Station</Label>
+          <Input
+            id="station"
+            name="station"
+            value={formData.station}
+            onChange={handleChange}
+            placeholder="Station"
+            className="border p-2 w-full"
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="collectiondate">Collection Date</Label>
+          <Input
+            id="collectiondate"
+            name="collectiondate"
+            value={formData.collectiondate}
+            onChange={handleChange}
+            placeholder="Collection Date"
+            className="border p-2 w-full"
+            type="date"
+            required
+          />
+          {errors.collectiondate && (
+            <p className="text-red-500 text-sm my-3">{errors.collectiondate}</p>
+          )}
+        </div>
+        {formData.collectiondate && !errors.collectiondate && (
+          <div>
+            <Label htmlFor="timeslot">Timeslot</Label>
+            <Select
+              id="timeslot"
+              name="timeslot"
+              onOpenChange={async () =>
+                await fetchSlotAvailability(formData.collectiondate)
+              }
+              value={formData.timeslot}
+              onValueChange={(value) => handleSelectChange("timeslot", value)}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Timeslot" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeslots.map((slot) => (
+                  <SelectItem
+                    key={slot.value}
+                    value={slot.value}
+                    disabled={slot.disabled}
+                  >
+                    {slot.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        <Button type="submit" className="w-full">
+          Submit
+        </Button>
+      </form>
     </main>
   );
 }
