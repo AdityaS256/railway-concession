@@ -81,7 +81,7 @@ export default function Home() {
       const slotData = slots.find((s) => s.timeslot === slot.value);
       return {
         ...slot,
-        disabled: !(slotData === undefined || slotData.count > 60),
+        disabled: !(slotData === undefined || slotData?.count < 60),
       };
     });
 
@@ -207,7 +207,44 @@ export default function Home() {
       alert("An error occured: ", error.message);
       console.error("Error inserting data:", error.message);
     } else {
-      alert("Form submitted sucessfully");
+      try {
+        const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: "John",
+            lastName: "Doe",
+            collectiondate: "2023-07-18",
+            timeslot: "10:00 AM",
+            address: "123 Main St",
+            school: "XYZ School",
+            sapId: "12345678",
+            contact: "9876543210",
+            gender: "Male",
+            dob: "2000-01-01",
+            age: "24",
+            course: "Computer Science",
+            stream: "Engineering",
+            year: "4",
+            classForPass: "Class 1",
+            passPeriod: "Monthly",
+            railwayType: "Local",
+            station: "Central",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+
+        const data = await response.json();
+        setPostData(data);
+      } catch (error) {
+        alert("Error",error);
+      }
+
       setIsSubmitted(true);
       console.log("Data inserted successfully:", data);
     }
@@ -223,10 +260,8 @@ export default function Home() {
     return <SuccessPage formData={formData} />;
   }
   return (
-    <main className="flex min-h-screen flex-col items-center bg-zinc-950 justify-between p-6">
-      <h1 className=" text-4xl font-black my-4 text-transparent bg-clip-text bg-gradient-to-tr from-blue-500 to-green-500">
-        Railway Concession{" "}
-      </h1>
+    <main className="flex min-h-screen flex-col items-center z-0 bg-[#1E1E1E] justify-between p-6">
+      <h1 className=" text-2xl font-black my-4 ">Railway Concession </h1>
       <form onSubmit={handleSubmit} className="space-y-4 w-full p-6 max-w-lg">
         <div>
           <Label htmlFor="firstName">First Name</Label>
@@ -353,6 +388,7 @@ export default function Home() {
             placeholder="Age"
             className="border p-2 w-full"
             required
+            disabled
           />
         </div>
         <div>
@@ -441,7 +477,7 @@ export default function Home() {
           </Select>
         </div>
         <div>
-          <Label htmlFor="classForPass">Class for Pass</Label>
+          <Label htmlFor="classForPass">Class for Railway Pass</Label>
           <Select
             id="classForPass"
             name="classForPass"
@@ -450,7 +486,7 @@ export default function Home() {
             required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Class for Pass" />
+              <SelectValue placeholder="Class for Railway Pass" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="first">First</SelectItem>
@@ -459,7 +495,7 @@ export default function Home() {
           </Select>
         </div>
         <div>
-          <Label htmlFor="passPeriod">Pass Period</Label>
+          <Label htmlFor="passPeriod">Railway Pass Period</Label>
           <Select
             id="passPeriod"
             name="passPeriod"
@@ -468,7 +504,7 @@ export default function Home() {
             required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Pass Period" />
+              <SelectValue placeholder="Railway Pass Period" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="monthly">Monthly</SelectItem>
@@ -496,7 +532,7 @@ export default function Home() {
           </Select>
         </div>
         <div>
-          <Label htmlFor="station">Station</Label>
+          <Label htmlFor="station">Railway Station Travelling from</Label>
           <Input
             id="station"
             name="station"
@@ -506,6 +542,10 @@ export default function Home() {
             className="border p-2 w-full"
             required
           />
+          <p className="text-sm text-gray-300">
+            {" "}
+            Note:Applicable only till Vile Parle Station
+          </p>
         </div>
         <div>
           <Label htmlFor="collectiondate">Collection Date</Label>
@@ -517,7 +557,6 @@ export default function Home() {
             placeholder="Collection Date"
             className="border p-2 flex justify-around min-w-full textbox-n"
             type="date"
-      
             required
           />
           {errors.collectiondate && (
