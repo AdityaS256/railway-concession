@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SuccessPage from "@/components/SuccessPage";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -225,7 +224,9 @@ export default function Home() {
   }
   return (
     <main className="flex min-h-screen flex-col items-center bg-zinc-950 justify-between p-6">
-      <h1 className=" text-4xl font-black my-4 text-transparent bg-clip-text bg-gradient-to-tr from-blue-500 to-green-500">Railway Concession </h1>
+      <h1 className=" text-4xl font-black my-4 text-transparent bg-clip-text bg-gradient-to-tr from-blue-500 to-green-500">
+        Railway Concession{" "}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4 w-full p-6 max-w-lg">
         <div>
           <Label htmlFor="firstName">First Name</Label>
@@ -336,7 +337,7 @@ export default function Home() {
             value={formData.dob}
             onChange={handleChange}
             placeholder="Date of Birth"
-            className="border p-2 w-full"
+            className="border p-2 flex justify-around min-w-full"
             type="date"
             required
           />
@@ -514,8 +515,9 @@ export default function Home() {
             value={formData.collectiondate}
             onChange={handleChange}
             placeholder="Collection Date"
-            className="border p-2 w-full"
+            className="border p-2 flex justify-around min-w-full textbox-n"
             type="date"
+      
             required
           />
           {errors.collectiondate && (
