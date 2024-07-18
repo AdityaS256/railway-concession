@@ -275,7 +275,7 @@ export default function Home() {
       alert("Error", error);
     }
   }
-  if (!isSubmitted) {
+  if (isSubmitted) {
     return <SuccessPage formData={formData} />;
   }
   return (
