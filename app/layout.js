@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Railway Concession",
-  description: "This website is created by Naitik Lodha from GDSC MPSTME",
+  description: "This website is created by Naitik Lodha and Arhaan Bhiwandkar from GDSC MPSTME",
 };
 
 export default function RootLayout({ children }) {
