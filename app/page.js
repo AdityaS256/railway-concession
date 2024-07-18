@@ -213,26 +213,8 @@ export default function Home() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            firstName: "John",
-            lastName: "Doe",
-            collectiondate: "2023-07-18",
-            timeslot: "10:00 AM",
-            address: "123 Main St",
-            school: "XYZ School",
-            sapId: "12345678",
-            contact: "9876543210",
-            gender: "Male",
-            dob: "2000-01-01",
-            age: "24",
-            course: "Computer Science",
-            stream: "Engineering",
-            year: "4",
-            classForPass: "Class 1",
-            passPeriod: "Monthly",
-            railwayType: "Local",
-            station: "Central",
-          }),
+          body: JSON.stringify(formData),
+          mode: "no-cors",
         });
 
         if (!response.ok) {
@@ -241,9 +223,7 @@ export default function Home() {
 
         const data = await response.json();
         setPostData(data);
-      } catch (error) {
-        alert("Error",error);
-      }
+      } catch (error) {}
 
       setIsSubmitted(true);
       console.log("Data inserted successfully:", data);
@@ -256,6 +236,45 @@ export default function Home() {
       [name]: value,
     });
   };
+  async function send() {
+    try {
+      const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: "John",
+          lastName: "Doe",
+          collectiondate: "2023-07-18",
+          timeslot: "10:00 AM",
+          address: "123 Main St",
+          school: "XYZ School",
+          sapId: "12345678",
+          contact: "9876543210",
+          gender: "Male",
+          dob: "2000-01-01",
+          age: "24",
+          course: "Computer Science",
+          stream: "Engineering",
+          year: "4",
+          classForPass: "Class 1",
+          passPeriod: "Monthly",
+          railwayType: "Local",
+          station: "Central",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+
+      const data = await response.json();
+      setPostData(data);
+    } catch (error) {
+      alert("Error", error);
+    }
+  }
   if (isSubmitted) {
     return <SuccessPage formData={formData} />;
   }
