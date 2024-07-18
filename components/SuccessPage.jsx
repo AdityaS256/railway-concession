@@ -20,40 +20,59 @@ export default function SuccessPage({ formData }) {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center bg-zinc-950 justify-center p-8 text-center">
-        <Card className="flex flex-col items-center max-w-[85vw] p-8 bg-gray-800 rounded-lg shadow-lg">
-          <CircleCheck
-            className="text-green-500 w-16 h-16 mb-4"
-            color="lightgreen"
-          />
-          <h1 className="text-4xl font-black my-4 text-center">
-            Form Submitted Successfully!
-          </h1>
-          <p className="text-lg text-white mb-2">
-            Please come between{" "}
-            <strong className="text-blue-400 text-xl underline italic">
-              {formData?.timeslot}
-            </strong>{" "}
-            on{" "}
-            <strong className="text-yellow-400 text-xl underline italic">
-              {formattedDate}
-            </strong>{" "}
-            to the counter.
+      <div className="w-full flex justify-center">
+        <div className="w-4/5 h-2/3 bg-[#272727] p-10 text-center rounded-xl flex-col items-center justify-center mt-5 md:w-1/2">
+          <div className="md:w-full md:flex md:justify-center md:mb-3">
+            <img src="images/freepik--Train--inject-4train.svg" alt=""></img>
+            <br />
+          </div>
+          <p className="text-white text-xl font-bold md:text-4xl">
+            Form Submitted!
           </p>
-          <p className="text-lg text-white mb-2">
-            A deposit of ₹2 will be required at the time of collection.
-          </p>
-          <p className="text-lg text-white mb-2">
-            The concession form will be valid for 3 days from the date of issue.
-          </p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            Go Back to Home
-          </Button>
-        </Card>
-      </main>
+          <div className="flex-col text-left text-xs mt-5 md:text-lg">
+            <p className="text-white">
+              <span className="font-bold">Sap ID:{formData.sapId}</span>
+            </p>
+            <p className="text-white font-bold mt-3">Form Collection:</p>
+            <ul className="text-white text-s list-disc pl-5">
+              <li>
+                <span className="font-medium">Date: </span>
+                {formattedDate}
+              </li>
+              <li>
+                <span className="font-medium">Time: </span>
+                {formData.timeslot}
+              </li>
+              <li>
+                <span className="font-medium">Deposit Fee: </span>₹2
+              </li>
+              <li>
+                <span className="font-medium">Validity of Form: </span>3 days
+                post collection
+              </li>
+            </ul>
+            <div className="w-full flex justify-center">
+              <button className="p-4 bg-lime-500 text-white mt-16 rounded-xl">
+                Go Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="md:w-full md:flex md:justify-center">
+        <div className="md:flex md:my-2">
+          <img
+            src="images/Instagram Buttonontrack.svg"
+            className="w-4/5 mx-10 my-2 md:w-1/2 md:mx-8"
+            alt=""
+          ></img>
+          <img
+            src="images/instagram.svg"
+            className="w-4/5 mx-10 my-2 md:w-1/2 md:mx-8"
+            alt=""
+          ></img>
+        </div>
+      </div>
     </>
   );
 }

@@ -275,7 +275,7 @@ export default function Home() {
       alert("Error", error);
     }
   }
-  if (isSubmitted) {
+  if (!isSubmitted) {
     return <SuccessPage formData={formData} />;
   }
   return (
@@ -616,6 +616,7 @@ export default function Home() {
           Submit
         </Button>
       </form>
+      <Footer />
     </main>
   );
 }
