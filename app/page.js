@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import Footer from "@/components/Footer";
 import {
   Select,
   SelectContent,
@@ -279,6 +280,7 @@ export default function Home() {
     return <SuccessPage formData={formData} />;
   }
   return (
+    <>
     <main className="flex min-h-screen flex-col items-center z-0 bg-[#1E1E1E] justify-between p-6">
       <h1 className=" text-2xl font-black my-4 ">Railway Concession </h1>
       <form onSubmit={handleSubmit} className="space-y-4 w-full p-6 max-w-lg">
@@ -616,7 +618,9 @@ export default function Home() {
           Submit
         </Button>
       </form>
-      <Footer />
+     
     </main>
+     <Footer />
+     </>
   );
 }
