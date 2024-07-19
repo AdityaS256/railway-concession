@@ -381,14 +381,14 @@ export default function Home() {
       existingRecord = existingRecords[0];
     }
   
-    let next_available = new Date(formData.collectiondate);
+    // let next_available = new Date(formData.collectiondate);
   
-    if (formData.gender.toLowerCase() === 'female' && formData.classForPass.toLowerCase() === 'second' && formData.passPeriod.toLowerCase() === 'monthly') {
-      next_available.setDate(next_available.getDate() + 23);
-    } else {
-      next_available.setDate(next_available.getDate() + 83);
-    }
-    next_available = next_available.toISOString();
+    // if (formData.gender.toLowerCase() === 'female' && formData.classForPass.toLowerCase() === 'second' && formData.passPeriod.toLowerCase() === 'monthly') {
+    //   next_available.setDate(next_available.getDate() + 23);
+    // } else {
+    //   next_available.setDate(next_available.getDate() + 83);
+    // }
+    // next_available = next_available.toISOString();
   
     const dataToInsertOrUpdate = {
       firstname: formData.firstName,
@@ -409,29 +409,29 @@ export default function Home() {
       station: formData.station,
       collectiondate: formData.collectiondate,
       timeslot: formData.timeslot,
-      next_available: next_available,
+      // next_available: next_available,
     };
   
     let response;
   
     if (existingRecord) {
-      const collectionDate = new Date(existingRecord.collectiondate);
-      const nextAvailableDate = new Date(existingRecord.next_available);
-      console.log(collectionDate);
-      console.log(nextAvailableDate);
+      // const collectionDate = new Date(existingRecord.collectiondate);
+      // const nextAvailableDate = new Date(existingRecord.next_available);
+      // console.log(collectionDate);
+      // console.log(nextAvailableDate);
   
-      // Calculate the date two days before the collection date
-      const dateTwoDaysBefore = new Date(collectionDate);
-      dateTwoDaysBefore.setDate(dateTwoDaysBefore.getDate() - 2);
-      console.log(dateTwoDaysBefore);
+      // // Calculate the date two days before the collection date
+      // const dateTwoDaysBefore = new Date(collectionDate);
+      // dateTwoDaysBefore.setDate(dateTwoDaysBefore.getDate() - 2);
+      // console.log(dateTwoDaysBefore);
   
-      // Check if the current date is within the allowed modification period
-      const currentDate = new Date();
-      if (!(currentDate >= dateTwoDaysBefore || currentDate >= nextAvailableDate)) {
-        setIsLoading(false);
-        alert(`Modifications can only be made after the next available date (${nextAvailableDate.toDateString()}) or within 2 days before the collection date (${dateTwoDaysBefore.toDateString()}).`);
-        return;
-      }
+      // // Check if the current date is within the allowed modification period
+      // const currentDate = new Date();
+      // if (!(currentDate >= dateTwoDaysBefore || currentDate >= nextAvailableDate)) {
+      //   setIsLoading(false);
+      //   alert(`Modifications can only be made after the next available date (${nextAvailableDate.toDateString()}) or within 2 days before the collection date (${dateTwoDaysBefore.toDateString()}).`);
+      //   return;
+      // }
 
       console.log("Updating existing record");
   
