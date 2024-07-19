@@ -62,31 +62,31 @@ export default function SuccessPage({ formData }) {
                 <p class="text-white text-center p-2 text-xs">Railway Concession form will be given as per selected time slot only.</p>
             </div>
             <div class="w-full h-fit flex justify-center items-center mt-0">
-              <Link href="/" class="w-full md:flex md:justify-center h-[3.5rem] p-0">
+              <a href="/" class="w-full md:flex md:justify-center h-[3.5rem] p-0">
                 <button class="w-full h-[3.5rem] p-4 bg-[#00C418] text-white mt-5 rounded-xl font-bold text-[1rem] md:w-full">
                   Return to Home
                 </button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
       </div>
       <div class="md:w-full md:flex md:justify-center">
         <div class="md:flex md:my-2 ">
-          <Link
+          <a
             href="https://ontrack.gdscmpstme.com/"
             target="_blank"
             class=" md:ml-0 md:mr-1"
           >
-            <Image
+            <img
               src="images/Instagram Buttonontrack.svg"
               class="w-4/5 mx-10 my-4 md:w-full md:mx-4"
               alt="OnTrack"
               width={600}
               height={300}
-            ></Image>
-          </Link>
-          <Link
+            ></img>
+          </a>
+          <a
             href="https://instagram.com/gdsc.mpstme"
             target="_blank"
             class="md:mr-7 md:ml-1"
@@ -98,7 +98,7 @@ export default function SuccessPage({ formData }) {
               width={600}
               height={300}
             ></img>
-          </Link>
+          </a>
         </div>
       </div>
     </>
