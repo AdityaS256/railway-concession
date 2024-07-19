@@ -369,6 +369,7 @@ export default function Home() {
       collectiondate: formData.collectiondate,
       timeslot: formData.timeslot,
     };
+    console.log(formData);
 
     const { data, error } = await supabase
       .from("form_submissions")
@@ -378,29 +379,72 @@ export default function Home() {
       alert("An error occured: ", error.message);
       console.error("Error inserting data:", error.message);
     } else {
-      try {
-        const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+      // try {
+        // const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify(formData),
+        //   mode: "no-cors",
+        // });
+        // console.log(response);
+        // if (!response.ok) {
+        //   throw new Error("Network response was not ok " + response.statusText);
+        // }
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-
-        const data = await response.json();
-        setPostData(data);
-      } catch (error) {
-        console.error(error)
-      }
+      //   const data = await response.json();
+      //   setPostData(data);
+      // } catch (error) {
+      //   console.error(error);
+      // }
 
       setIsLoading(false);
       setIsSubmitted(true);
 
       console.log("Data inserted successfully:", data);
+    }
+  };
+
+  const test = async () => {
+    const dataToInsert = {
+      firstName: "Jane",
+      lastName: "Smith",
+      address: "5678 Oak Avenue, Metropolis, NY",
+      school: "MPSTME",
+      sapId: "M9876543",
+      contact: "+1-555-6789",
+      gender: "Female",
+      dob: "1999-05-15",
+      age: "25",
+      course: "Information Technology",
+      stream: "Engineering",
+      year: "4th Year",
+      classForPass: "M.Tech",
+      passPeriod: "2024-08-01 to 2024-08-31",
+      railwayType: "Sleeper",
+      station: "Metropolis Junction",
+      collectiondate: "2024-08-10",
+      timeslot: "02:00 PM - 03:00 PM",
+    };
+    try {
+      const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        mode: "no-cors",
+      });
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+
+      const data = await response.json();
+      setPostData(data);
+    } catch (error) {
+      console.error(error);
     }
   };
 
