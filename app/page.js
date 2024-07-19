@@ -44,6 +44,152 @@ export default function Home() {
     contact: "",
     dob: "",
   });
+  const stations = {
+    Western: [
+      "Churchgate",
+      "Marine Lines",
+      "Charni Road",
+      "Grant Road",
+      "Mumbai Central",
+      "Mahalakshmi",
+      "Lower Parel",
+      "Prabhadevi",
+      "Dadar",
+      "Matunga Road",
+      "Mahim Jn",
+      "Bandra",
+      "Khar Road",
+      "Santa Cruz",
+      "Vile Parle",
+      "Andheri",
+      "Jogeshwari",
+      "Ram Mandir",
+      "Goregaon",
+      "Malad",
+      "Kandivali",
+      "Borivali",
+      "Dahisar",
+      "Mira Road",
+      "Naigaon",
+      "Vasai Road",
+      "Nalla Sopara",
+      "Virar",
+      "Vaitarana",
+      "Saphale",
+      "Kelva Road",
+      "Palghar",
+      "Umroli Road",
+      "Boisar",
+      "Vangaon",
+      "Dahanu Road",
+    ],
+    Central: [
+      "CSMT",
+      "Masjid",
+      "Sandhurst Road",
+      "Byculla",
+      "Chinchpokli",
+      "Currey Road",
+      "Parel",
+      "Dadar",
+      "Matunga",
+      "Sion",
+      "Kurla",
+      "Vidyavihar",
+      "Ghatkopar",
+      "Vikhroli",
+      "Kanjur Marg",
+      "Bhandup",
+      "Nahur",
+      "Mulund",
+      "Thane",
+      "Kalva",
+      "Mumbra",
+      "Diva Jn",
+      "Kopar",
+      "Dombivli",
+      "Thakurli",
+      "Kalyan",
+      "Vithalwadi",
+      "Ulhas Nagar",
+      "Badlapur",
+      "Vangani",
+      "Neral",
+      "Bhivpuri Road",
+      "Karjat",
+      "Palasdhari",
+      "Kelavli",
+      "Dolavli",
+      "Lowjee",
+      "Khopoli",
+      "Shahad",
+      "Ambivli",
+      "Titwala",
+      "Khadavli",
+      "Vasind",
+      "Asangaon",
+      "Atgaon",
+      "Thansit",
+      "Khardi",
+      "Umbermali",
+      "Kasara",
+    ],
+    Harbour: [
+      "CSMT",
+      "Masjid",
+      "Sandhurst Road",
+      "Dockyard Road",
+      "Reay Road",
+      "Cotton Green",
+      "Sewri",
+      "Vadala Road",
+      "Kings Circle",
+      "Mahim Jn",
+      "Bandra",
+      "Khar Road",
+      "Santa Cruz",
+      "Vile Parle",
+      "Andheri",
+      "Jogeshwari",
+      "Ram Mandir",
+      "Goregaon",
+      "GTB Nagar",
+      "Chunabhatti",
+      "Kurla",
+      "Tilaknagar",
+      "Chembur",
+      "Govandi",
+      "Mankhurd",
+      "Vashi",
+      "Sanpada",
+      "Juinagar",
+      "Nerul",
+      "Seawood Darave",
+      "Belapur CBD",
+      "Kharghar",
+      "Manasarovar",
+      "Khandeshwar",
+      "Panvel",
+    ],
+    Trans: [
+      "Thane",
+      "Airoli",
+      "Rabale",
+      "Ghansoli",
+      "Koparkhairne",
+      "Turbhe",
+      "Sanpada",
+      "Vashi",
+      "Juinagar",
+      "Nerul",
+      "Seawood Darave",
+      "Belapur CBD",
+      "Kharghar",
+      "Manasarovar",
+      "Khandeshwar",
+      "Panvel",
+    ],
+  };
 
   const [timeslots, setTimeslots] = useState([
     {
@@ -67,6 +213,20 @@ export default function Home() {
       disabled: false,
     },
   ]);
+  const streamOptions = [
+    "ARTIFICIAL INTELLIGENCE",
+    "CIVIL",
+    "COMPUTER ENGINEERING",
+    "COMPUTER SCIENCE & BUSINESS SYSTEMS",
+    "COMPUTER SCIENCE & ENGINEERING DATA SCIENCE (311)",
+    "CYBER SECURITY",
+    "DATA SCIENCE",
+    "ELECTRONICS & TELECOMMUNICATION",
+    "INFORMATION TECHNOLOGY",
+    "MECHANICAL",
+    "MECHATRONICS",
+    "MCA",
+  ];
 
   const fetchSlotAvailability = async (date) => {
     const { data: slots, error } = await supabase
@@ -104,7 +264,7 @@ export default function Home() {
   };
   const isWeekend = (date) => {
     const day = date.getDay();
-    return day === 0 || day === 6;
+    return day === 0;
   };
 
   const handleChange = (e) => {
@@ -225,7 +385,6 @@ export default function Home() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
-          mode: "no-cors",
         });
 
         if (!response.ok) {
@@ -234,7 +393,9 @@ export default function Home() {
 
         const data = await response.json();
         setPostData(data);
-      } catch (error) {}
+      } catch (error) {
+        console.error(error)
+      }
 
       setIsLoading(false);
       setIsSubmitted(true);
@@ -329,6 +490,7 @@ export default function Home() {
               placeholder="School"
               className="border p-2 w-full"
               required
+              disabled
             />
           </div>
           <div>
@@ -449,30 +611,11 @@ export default function Home() {
                 <SelectValue placeholder="Stream" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ARTIFICIAL INTELLIGENCE">
-                  ARTIFICIAL INTELLIGENCE
-                </SelectItem>
-                <SelectItem value="CIVIL">CIVIL</SelectItem>
-                <SelectItem value="COMPUTER ENGINEERING">
-                  COMPUTER ENGINEERING
-                </SelectItem>
-                <SelectItem value="COMPUTER SCIENCE & BUSINESS SYSTEMS">
-                  COMPUTER SCIENCE & BUSINESS SYSTEMS
-                </SelectItem>
-                <SelectItem value="COMPUTER SCIENCE & ENGINEERING DATA SCIENCE (311)">
-                  COMPUTER SCIENCE & ENGINEERING DATA SCIENCE (311)
-                </SelectItem>
-                <SelectItem value="CYBER SECURITY">CYBER SECURITY</SelectItem>
-                <SelectItem value="DATA SCIENCE">DATA SCIENCE</SelectItem>
-                <SelectItem value="ELECTRONICS & TELECOMMUNICATION">
-                  ELECTRONICS & TELECOMMUNICATION
-                </SelectItem>
-                <SelectItem value="INFORMATION TECHNOLOGY">
-                  INFORMATION TECHNOLOGY
-                </SelectItem>
-                <SelectItem value="MECHANICAL">MECHANICAL</SelectItem>
-                <SelectItem value="MECHATRONICS">MECHATRONICS</SelectItem>
-                <SelectItem value="MCA">MCA</SelectItem>
+                {streamOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -551,26 +694,38 @@ export default function Home() {
                 <SelectValue placeholder="Railway Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="central">Central</SelectItem>
-                <SelectItem value="western">Western</SelectItem>
-                <SelectItem value="harbor">Harbor</SelectItem>
+                <SelectItem value="Central">Central</SelectItem>
+                <SelectItem value="Western">Western</SelectItem>
+                <SelectItem value="Harbour">Harbour</SelectItem>
+                <SelectItem value="Trans">Trans</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label htmlFor="station">Railway Station Travelling from</Label>
-            <Input
+            <Select
               id="station"
               name="station"
               value={formData.station}
-              onChange={handleChange}
-              placeholder="Station"
-              className="border p-2 w-full"
+              onValueChange={(value) => handleSelectChange("station", value)}
+              disabled={!formData.railwayType}
               required
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Station" />
+              </SelectTrigger>
+              <SelectContent>
+                {formData.railwayType &&
+                  stations[formData.railwayType].map((station) => (
+                    <SelectItem key={station} value={station}>
+                      {station}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
             <p className="text-sm text-gray-300">
               {" "}
-              Note:Applicable only till Vile Parle Station
+              Note: Applicable only till Vile Parle Station
             </p>
           </div>
           <div>

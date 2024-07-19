@@ -9,7 +9,7 @@ export default function Footer() {
         href="https://www.instagram.com/gdsc.mpstme/"
         className="underline italic "
       >
-        <Image src="footer.svg" height={300} width={300} alt="Footer"></Image>
+        <Image src="footer.svg" height={350} width={350} alt="Footer"></Image>
       </Link>
     </footer>
   );

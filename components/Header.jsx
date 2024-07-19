@@ -6,19 +6,13 @@ export default function Header() {
     <nav className="bg-[#272727] bg-opacity-100 w-full sticky top-0 text-white p-4 z-50 flex justify-between items-center">
       <div className="flex items-center w-full justify-between space-x-4">
         <Image
-          src="/nmims-linear.svg"
+          src="/nmims.png"
           alt="NMIMS Logo"
-          width={150}
+          width={200}
           height={150}
           className="cursor-pointer"
         />
-        <Image
-          src="/gdsc-white-linear.svg"
-          alt="GDSC Logo"
-          width={150}
-          height={150}
-          className="cursor-pointer"
-        />
+      
       </div>
     </nav>
   );
