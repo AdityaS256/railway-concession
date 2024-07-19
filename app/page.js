@@ -252,7 +252,7 @@ export default function Home() {
   if (isSubmitted) {
     return <SuccessPage formData={formData} />;
   }
-  if (!isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div role="status">
