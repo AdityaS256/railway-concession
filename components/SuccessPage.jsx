@@ -22,7 +22,7 @@ export default function SuccessPage({ formData }) {
 
   return (
     <>
-      <div classNameName="w-full flex justify-center">
+      <div className="w-full flex justify-center">
         <div className="w-4/5 h-2/3 bg-[#272727] p-10 text-center rounded-xl flex-col items-center justify-center mt-5 md:w-1/2 ">
           <div className="md:w-full md:flex md:justify-center md:mb-3">
             <img
