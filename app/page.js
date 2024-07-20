@@ -338,23 +338,64 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emptyFields = Object.keys(formData).filter((key) => !formData[key]);
-
+  
     if (emptyFields.length > 0) {
-      alert(
-        `Please fill in all the fields. Missing: ${emptyFields.join(", ")}`
-      );
+      alert(`Please fill in all the fields. Missing: ${emptyFields.join(", ")}`);
       return;
     }
     setIsLoading(true);
-
+  
     await fetchSlotAvailability(formData.collectiondate);
-
-    const dataToInsert = {
+  
+    // Ensure sapId is treated as a number
+    const sapId = Number(formData.sapId);
+  
+    // Log the SAP ID and type to ensure it's correct
+    console.log("SAP ID:", sapId, "Type:", typeof sapId);
+  
+    // Fetch the existing record using the SAP ID
+    const { data: existingRecords, error: fetchError } = await supabase
+      .from("form_submissions")
+      .select("*")
+      .eq("sapid", sapId);
+  
+    if (fetchError) {
+      setIsLoading(false);
+      alert("An error occurred while checking for existing record: " + fetchError.message);
+      console.error("Error fetching record:", fetchError.message);
+      return;
+    }
+  
+    // Log the fetched records
+    console.log("Existing Records:", existingRecords);
+  
+    if (existingRecords.length > 1) {
+      setIsLoading(false);
+      alert("Multiple records found with the same SAP ID. Please contact support.");
+      console.error("Multiple records found with the same SAP ID:", existingRecords);
+      return;
+    }
+  
+    let existingRecord = null;
+    if (existingRecords.length === 1) {
+      existingRecord = existingRecords[0];
+    }
+  
+    // let next_available = new Date(formData.collectiondate);
+  
+    // if (formData.gender.toLowerCase() === 'female' && formData.classForPass.toLowerCase() === 'second' && formData.passPeriod.toLowerCase() === 'monthly') {
+    //   next_available.setDate(next_available.getDate() + 23);
+    // } else {
+    //   next_available.setDate(next_available.getDate() + 83);
+    // }
+    // next_available = next_available.toISOString();
+  
+    const dataToInsertOrUpdate = {
       firstname: formData.firstName,
       lastname: formData.lastName,
       address: formData.address,
       school: formData.school,
-      sapid: formData.sapId,
+      sapid: sapId,
       contact: formData.contact,
       gender: formData.gender,
       dob: formData.dob,
@@ -368,43 +409,84 @@ export default function Home() {
       station: formData.station,
       collectiondate: formData.collectiondate,
       timeslot: formData.timeslot,
+      // next_available: next_available,
     };
-    console.log(formData);
-
-    const { data, error } = await supabase
-      .from("form_submissions")
-      .insert([dataToInsert]);
-
-    if (error) {
-      alert("An error occured: ", error.message);
-      console.error("Error inserting data:", error.message);
-    } else {
-      // try {
-        // const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify(formData),
-        //   mode: "no-cors",
-        // });
-        // console.log(response);
-        // if (!response.ok) {
-        //   throw new Error("Network response was not ok " + response.statusText);
-        // }
-
-      //   const data = await response.json();
-      //   setPostData(data);
-      // } catch (error) {
-      //   console.error(error);
+  
+    let response;
+  
+    if (existingRecord) {
+      // const collectionDate = new Date(existingRecord.collectiondate);
+      // const nextAvailableDate = new Date(existingRecord.next_available);
+      // console.log(collectionDate);
+      // console.log(nextAvailableDate);
+  
+      // // Calculate the date two days before the collection date
+      // const dateTwoDaysBefore = new Date(collectionDate);
+      // dateTwoDaysBefore.setDate(dateTwoDaysBefore.getDate() - 2);
+      // console.log(dateTwoDaysBefore);
+  
+      // // Check if the current date is within the allowed modification period
+      // const currentDate = new Date();
+      // if (!(currentDate >= dateTwoDaysBefore || currentDate >= nextAvailableDate)) {
+      //   setIsLoading(false);
+      //   alert(`Modifications can only be made after the next available date (${nextAvailableDate.toDateString()}) or within 2 days before the collection date (${dateTwoDaysBefore.toDateString()}).`);
+      //   return;
       // }
 
+      console.log("Updating existing record");
+  
+      // Update existing record
+      const { data, error } = await supabase
+        .from("form_submissions")
+        .update(dataToInsertOrUpdate)
+        .eq("sapid", sapId);
+  
+      response = { data, error };
+    } else {
+      console.log("Inserting new record");
+  
+      // Insert new record
+      const { data, error } = await supabase
+        .from("form_submissions")
+        .insert([dataToInsertOrUpdate]);
+  
+      response = { data, error };
+    }
+  
+    const { data, error } = response;
+  
+    if (error) {
+      alert("An error occurred: " + error.message);
+      console.error("Error saving data:", error.message);
+    } else {
+      // If no error, send data to Google Sheets
+      try {
+        const response = await fetch(process.env.NEXT_PUBLIC_APPSCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToInsertOrUpdate),
+          mode: "no-cors",
+        });
+  
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+  
+        const data = await response.json();
+        setPostData(data);
+      } catch (error) {
+        console.error("Error with Google Apps Script request:", error);
+      }
+  
       setIsLoading(false);
       setIsSubmitted(true);
-
-      console.log("Data inserted successfully:", data);
+      console.log("Data saved successfully:", data);
     }
   };
+    
+  
 
   const test = async () => {
     const dataToInsert = {
