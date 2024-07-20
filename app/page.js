@@ -229,10 +229,19 @@ export default function Home() {
   ];
 
   const fetchSlotAvailability = async (date) => {
-    const { data: slots, error } = await supabase
-      .from("slots")
-      .select("timeslot, count")
+    const { data: newData, error } = await supabase
+      .from("form_submissions")
+      .select()
       .eq("collectiondate", date);
+
+    var freq = {};
+    console.log(newData);
+    newData.map((d) => {
+      freq[d.timeslot] =
+        freq[d.timeslot] != undefined ? freq[d.timeslot] + 1 : 1;
+    });
+
+    console.log("New Data: ", freq);
 
     if (error) {
       console.error("Error fetching slot availability:", error.message);
@@ -240,12 +249,14 @@ export default function Home() {
     }
 
     const updatedSlots = timeslots.map((slot) => {
-      const slotData = slots.find((s) => s.timeslot === slot.value);
+      const slotData = freq[slot.value] || 0;
       return {
         ...slot,
-        disabled: !(slotData === undefined || slotData?.count < 60),
+        disabled: !(slotData === undefined || slotData < 60),
       };
     });
+
+    console.log(updatedSlots);
 
     setTimeslots(updatedSlots);
   };
@@ -338,58 +349,68 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emptyFields = Object.keys(formData).filter((key) => !formData[key]);
-  
+
     if (emptyFields.length > 0) {
-      alert(`Please fill in all the fields. Missing: ${emptyFields.join(", ")}`);
+      alert(
+        `Please fill in all the fields. Missing: ${emptyFields.join(", ")}`
+      );
       return;
     }
     setIsLoading(true);
-  
+
     await fetchSlotAvailability(formData.collectiondate);
-  
+
     // Ensure sapId is treated as a number
     const sapId = Number(formData.sapId);
-  
+
     // Log the SAP ID and type to ensure it's correct
     console.log("SAP ID:", sapId, "Type:", typeof sapId);
-  
+
     // Fetch the existing record using the SAP ID
     const { data: existingRecords, error: fetchError } = await supabase
       .from("form_submissions")
       .select("*")
       .eq("sapid", sapId);
-  
+
     if (fetchError) {
       setIsLoading(false);
-      alert("An error occurred while checking for existing record: " + fetchError.message);
+      alert(
+        "An error occurred while checking for existing record: " +
+          fetchError.message
+      );
       console.error("Error fetching record:", fetchError.message);
       return;
     }
-  
+
     // Log the fetched records
     console.log("Existing Records:", existingRecords);
-  
+
     if (existingRecords.length > 1) {
       setIsLoading(false);
-      alert("Multiple records found with the same SAP ID. Please contact support.");
-      console.error("Multiple records found with the same SAP ID:", existingRecords);
+      alert(
+        "Multiple records found with the same SAP ID. Please contact support."
+      );
+      console.error(
+        "Multiple records found with the same SAP ID:",
+        existingRecords
+      );
       return;
     }
-  
+
     let existingRecord = null;
     if (existingRecords.length === 1) {
       existingRecord = existingRecords[0];
     }
-  
+
     // let next_available = new Date(formData.collectiondate);
-  
+
     // if (formData.gender.toLowerCase() === 'female' && formData.classForPass.toLowerCase() === 'second' && formData.passPeriod.toLowerCase() === 'monthly') {
     //   next_available.setDate(next_available.getDate() + 23);
     // } else {
     //   next_available.setDate(next_available.getDate() + 83);
     // }
     // next_available = next_available.toISOString();
-  
+
     const dataToInsertOrUpdate = {
       firstname: formData.firstName,
       lastname: formData.lastName,
@@ -411,20 +432,20 @@ export default function Home() {
       timeslot: formData.timeslot,
       // next_available: next_available,
     };
-  
+
     let response;
-  
+
     if (existingRecord) {
       // const collectionDate = new Date(existingRecord.collectiondate);
       // const nextAvailableDate = new Date(existingRecord.next_available);
       // console.log(collectionDate);
       // console.log(nextAvailableDate);
-  
+
       // // Calculate the date two days before the collection date
       // const dateTwoDaysBefore = new Date(collectionDate);
       // dateTwoDaysBefore.setDate(dateTwoDaysBefore.getDate() - 2);
       // console.log(dateTwoDaysBefore);
-  
+
       // // Check if the current date is within the allowed modification period
       // const currentDate = new Date();
       // if (!(currentDate >= dateTwoDaysBefore || currentDate >= nextAvailableDate)) {
@@ -434,27 +455,27 @@ export default function Home() {
       // }
 
       console.log("Updating existing record");
-  
+
       // Update existing record
       const { data, error } = await supabase
         .from("form_submissions")
         .update(dataToInsertOrUpdate)
         .eq("sapid", sapId);
-  
+
       response = { data, error };
     } else {
       console.log("Inserting new record");
-  
+
       // Insert new record
       const { data, error } = await supabase
         .from("form_submissions")
         .insert([dataToInsertOrUpdate]);
-  
+
       response = { data, error };
     }
-  
+
     const { data, error } = response;
-  
+
     if (error) {
       alert("An error occurred: " + error.message);
       console.error("Error saving data:", error.message);
@@ -469,24 +490,22 @@ export default function Home() {
           body: JSON.stringify(dataToInsertOrUpdate),
           mode: "no-cors",
         });
-  
+
         if (!response.ok) {
           throw new Error("Network response was not ok " + response.statusText);
         }
-  
+
         const data = await response.json();
         setPostData(data);
       } catch (error) {
         console.error("Error with Google Apps Script request:", error);
       }
-  
+
       setIsLoading(false);
       setIsSubmitted(true);
       console.log("Data saved successfully:", data);
     }
   };
-    
-  
 
   const test = async () => {
     const dataToInsert = {
