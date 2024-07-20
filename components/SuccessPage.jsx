@@ -25,12 +25,12 @@ export default function SuccessPage({ formData }) {
       <div className="w-full flex justify-center">
         <div className="w-4/5 h-2/3 bg-[#272727] p-10 text-center rounded-xl flex-col items-center justify-center mt-5 md:w-1/2 ">
           <div className="md:w-full md:flex md:justify-center md:mb-3">
-            <Image
+            <img
               src="images/freepik--Train--inject-4train.svg"
               alt=""
               width={300}
               height={300}
-            ></Image>
+            ></img>
             <br />
           </div>
           <p className="text-white text-xl font-bold md:text-4xl">
@@ -58,9 +58,12 @@ export default function SuccessPage({ formData }) {
                 post collection
               </li>
             </ul>
-            <div className="w-full flex justify-center">
-              <a href="/" className="w-full md:flex md:justify-center">
-                <button className="w-full h-[3.5rem] p-4 bg-[#00C418] text-white mt-16 rounded-xl font-bold text-[1rem] md:w-1/3">
+            <div className="w-full flex items-center justify-center mt-4 font-medium border-2 border-red-500 bg-red-500 rounded-lg ">
+                <p className="text-white text-center p-2 text-xs">Railway Concession form will be given as per selected time slot only.</p>
+            </div>
+            <div className="w-full h-fit flex justify-center items-center mt-0">
+              <a href="/" className="w-full md:flex md:justify-center h-[3.5rem] p-0">
+                <button className="w-full h-[3.5rem] p-4 bg-[#00C418] text-white mt-5 rounded-xl font-bold text-[1rem] md:w-full">
                   Return to Home
                 </button>
               </a>
@@ -69,33 +72,33 @@ export default function SuccessPage({ formData }) {
         </div>
       </div>
       <div className="md:w-full md:flex md:justify-center">
-        <div className="md:flex md:my-2">
-          <Link
+        <div className="md:flex md:my-2 ">
+          <a
             href="https://ontrack.gdscmpstme.com/"
             target="_blank"
-            className="md:w-full md:mx-4"
+            className=" md:ml-0 md:mr-1"
           >
-            <Image
+            <img
               src="images/Instagram Buttonontrack.svg"
               className="w-4/5 mx-10 my-4 md:w-full md:mx-4"
               alt="OnTrack"
               width={600}
               height={300}
-            ></Image>
-          </Link>
-          <Link
+            ></img>
+          </a>
+          <a
             href="https://instagram.com/gdsc.mpstme"
             target="_blank"
-            className="md:w-full md:mx-4"
+            className="md:mr-7 md:ml-1"
           >
-            <Image
+            <img
               src="images/instagram.svg"
               className="w-4/5 mx-10 my-4 md:w-full md:mx-4"
               alt="Instagram"
               width={600}
               height={300}
-            ></Image>
-          </Link>
+            ></img>
+          </a>
         </div>
       </div>
     </>
