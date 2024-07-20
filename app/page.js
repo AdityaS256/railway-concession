@@ -229,14 +229,14 @@ export default function Home() {
   ];
 
   const fetchSlotAvailability = async (date) => {
-    const { data: newData, error } = await supabase
+    const { data: slots, error } = await supabase
       .from("form_submissions")
       .select()
       .eq("collectiondate", date);
 
     var freq = {};
-    console.log(newData);
-    newData.map((d) => {
+    console.log(slots);
+    slots.map((d) => {
       freq[d.timeslot] =
         freq[d.timeslot] != undefined ? freq[d.timeslot] + 1 : 1;
     });
