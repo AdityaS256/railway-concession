@@ -235,13 +235,11 @@ export default function Home() {
       .eq("collectiondate", date);
 
     var freq = {};
-    console.log(slots);
+
     slots.map((d) => {
       freq[d.timeslot] =
         freq[d.timeslot] != undefined ? freq[d.timeslot] + 1 : 1;
     });
-
-    console.log("New Data: ", freq);
 
     if (error) {
       console.error("Error fetching slot availability:", error.message);
@@ -255,8 +253,6 @@ export default function Home() {
         disabled: !(slotData === undefined || slotData < 60),
       };
     });
-
-    console.log(updatedSlots);
 
     setTimeslots(updatedSlots);
   };
